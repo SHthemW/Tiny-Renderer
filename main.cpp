@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <tuple>
 
-const TGAColor white = TGAColor(255, 255, 255, 255);
-const TGAColor red   = TGAColor(255, 0,   0,   255);
-const char* output_path = "out/output.tga";
+const TGAColor white       = TGAColor(255, 255, 255, 255);
+const TGAColor red         = TGAColor(255, 0,   0,   255);
+const char*    output_path = "out/output.tga";
 
 static void point(const int x, const int y, TGAImage& image, const TGAColor color)
 {
