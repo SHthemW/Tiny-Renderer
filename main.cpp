@@ -1,10 +1,14 @@
 #include "tgaimage.h"
 #include <stdio.h>
 #include <tuple>
+#include "model.h"
 
-const TGAColor white       = TGAColor(255, 255, 255, 255);
-const TGAColor red         = TGAColor(255, 0,   0,   255);
-const char*    output_path = "out/output.tga";
+const TGAColor white = TGAColor(255, 255, 255, 255);
+const TGAColor red   = TGAColor(255, 0,   0,   255);
+const char* output_path = "out/output.tga";
+
+constexpr int gwidth  = 500;
+constexpr int gheight = 500;
 
 static void point(const int x, const int y, TGAImage& image, const TGAColor color)
 {
@@ -23,17 +27,31 @@ static void line(const int x0, const int y0, const int x1, const int y1, TGAImag
     }
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    printf("begin...\n");
-    TGAImage image(100, 100, TGAImage::RGB);
+    Model model("resources/african_head.obj");
+    TGAImage image(gwidth, gheight, TGAImage::RGB);
 
-    line(13, 20, 80, 40, image, white);
-    line(20, 13, 40, 80, image, red);
-    line(80, 40, 13, 20, image, red);
+    for (int facei = 0; facei < model.nfaces(); facei++)
+    {
+        std::vector<int> face = model.face(facei);
+
+        for (int veci = 0; veci < 3; veci++) // vec3f has three element (x, y, z)
+        {
+            Vec3f v0 = model.vert(face[veci]);
+            Vec3f v1 = model.vert(face[(veci + 1) % 3]);
+
+            int x0 = (v0.x + 1.) * gwidth  / 2;
+            int y0 = (v0.y + 1.) * gheight / 2;
+            int x1 = (v1.x + 1.) * gwidth  / 2;
+            int y1 = (v1.y + 1.) * gheight / 2;
+
+            line(x0, y0, x1, y1, image, white);
+        }
+    }
 
     image.flip_vertically();
     image.write_tga_file(output_path);
-    printf("ok.");
+
     return 0;
 }
