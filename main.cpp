@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <tuple>
+#include <cstdlib>
 #include "model.h"
 #include "graph_drawer.h"
 
@@ -11,7 +11,7 @@ int scale_ratio = 250;
 
 
 
-static void draw_african_head_line(Model model, TGAImage& image)
+static void draw_african_head_line(Model model, TGAImage& image, TGAColor color = white)
 {
     if (scale_ratio > gwidth / 2 || scale_ratio > gheight / 2)
         printf("warning: too large scale_ratio: %d", scale_ratio);
@@ -31,9 +31,16 @@ static void draw_african_head_line(Model model, TGAImage& image)
             int x1 = (v1.x + 1.) * scale_ratio;
             int y1 = (v1.y + 1.) * scale_ratio;
 
-            line(x0, y0, x1, y1, image, white);
+            line(x0, y0, x1, y1, image, color);
         }
     }
+}
+
+static void draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2, TGAImage& image, TGAColor color = white)
+{
+    line(x0, y0, x1, y1, image, color);
+    line(x1, y1, x2, y2, image, color);
+    line(x2, y2, x0, y0, image, color);
 }
 
 
@@ -42,7 +49,11 @@ int main(int argc, char** argv)
     Model model("resources/african_head.obj");
     TGAImage image(gwidth, gheight, TGAImage::RGB);
 
-    draw_african_head_line(model, image);
+    // draw_african_head_line(model, image);
+
+    draw_triangle(100, 100, 150, 300, 300, 300, image, white);
+    draw_triangle(200, 450, 450, 450, 100, 350, image, green);
+    draw_triangle(400, 250, 200,  50, 250, 150, image, red);
 
     image.flip_vertically();
     image.write_tga_file(output_path);
