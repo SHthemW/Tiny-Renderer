@@ -5,6 +5,10 @@
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor green = TGAColor(0  , 255,   0, 255);
 const TGAColor red   = TGAColor(255,   0,   0, 255);
+const TGAColor random_color()
+{
+    return TGAColor(rand() % 255, rand() % 255, rand() % 255, 255);
+}
 
 static void line(const int x0, const int y0, const int x1, const int y1, TGAImage& image, const TGAColor color = white, const int resulotion = 10)
 {

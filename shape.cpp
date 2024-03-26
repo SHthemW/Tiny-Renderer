@@ -1,8 +1,8 @@
 #include "shape.h"
 
-Triangle::Triangle(Vec2i p1, Vec2i p2, Vec2i p3) : _point1(p1), _point2(p2), _point3(p3)
-{
-}
+Triangle::Triangle(Vec2i p1, Vec2i p2, Vec2i p3) : _point1(p1), _point2(p2), _point3(p3) { }
+
+Triangle::Triangle(Vec2i vertex[3]) : _point1(vertex[0]), _point2(vertex[1]), _point3(vertex[2]) {}
 
 bool Triangle::inside(Vec2i point)
 {

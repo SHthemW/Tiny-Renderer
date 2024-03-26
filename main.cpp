@@ -10,14 +10,33 @@ int gwidth  = 500;
 int gheight = 500;
 int scale_ratio = 250;
 
-static void draw_african_head_line(Model model, TGAImage& image, TGAColor color = white)
+static void draw_triangle(Triangle triangle, TGAImage& image, TGAColor color = white, bool fill = true, bool debug = false)
+{
+    line(triangle.get_point1().x, triangle.get_point1().y, triangle.get_point2().x, triangle.get_point2().y, image, color);
+    line(triangle.get_point2().x, triangle.get_point2().y, triangle.get_point3().x, triangle.get_point3().y, image, color);
+    line(triangle.get_point3().x, triangle.get_point3().y, triangle.get_point1().x, triangle.get_point1().y, image, color);
+
+    if (fill) 
+        fillif(std::bind(&Triangle::inside, &triangle, std::placeholders::_1), image, color);
+
+    if (debug)
+        printf("\ntriangle (%d, %d), (%d, %d), (%d, %d) is drawed.",
+            triangle.get_point1().x, triangle.get_point1().y, 
+            triangle.get_point2().x, triangle.get_point2().y, 
+            triangle.get_point3().x, triangle.get_point3().y);
+}
+
+static void draw_model(Model model, TGAImage& image, TGAColor linecolor = white, bool fill = true, bool debug = false)
 {
     if (scale_ratio > gwidth / 2 || scale_ratio > gheight / 2)
         printf("warning: too large scale_ratio: %d", scale_ratio);
 
-    for (int facei = 0; facei < model.nfaces(); facei++)
+    const int face_num = model.nfaces();
+
+    for (int facei = 0; facei < face_num; facei++)
     {
         std::vector<int> face = model.face(facei);
+        Vec2i triangle_vertex[3];
 
         for (int veci = 0; veci < 3; veci++) // vec3f has three element (x, y, z)
         {
@@ -30,38 +49,32 @@ static void draw_african_head_line(Model model, TGAImage& image, TGAColor color 
             int x1 = (v1.x + 1.) * scale_ratio;
             int y1 = (v1.y + 1.) * scale_ratio;
 
-            line(x0, y0, x1, y1, image, color);
+            line(x0, y0, x1, y1, image, linecolor);
+            triangle_vertex[veci] = Vec2i(x0, y0);
         }
+
+        draw_triangle(Triangle(triangle_vertex), image, random_color(), fill);
+
+        if (debug)
+            printf("\ndrawing model triangle: [%d / %d]", facei, face_num);
     }
 }
 
-static void draw_triangle(Triangle triangle, TGAImage& image, TGAColor color = white)
-{
-    line(triangle.get_point1().x, triangle.get_point1().y, triangle.get_point2().x, triangle.get_point2().y, image, color);
-    line(triangle.get_point2().x, triangle.get_point2().y, triangle.get_point3().x, triangle.get_point3().y, image, color);
-    line(triangle.get_point3().x, triangle.get_point3().y, triangle.get_point1().x, triangle.get_point1().y, image, color);
-}
-
-
 int main(int argc, char** argv)
 {
-    Model model("resources/african_head.obj");
     TGAImage image(gwidth, gheight, TGAImage::RGB);
 
-    // draw_african_head_line(model, image);
-
-    Triangle triangle1(Vec2i(100, 100), Vec2i(150, 300), Vec2i(350, 350));
+    /*Triangle triangle1(Vec2i(100, 100), Vec2i(150, 300), Vec2i(350, 350));
     Triangle triangle2(Vec2i(200, 450), Vec2i(450, 450), Vec2i(100, 350));
-    Triangle triangle3(Vec2i(400, 250), Vec2i(200, 50), Vec2i(250, 150));
+    Triangle triangle3(Vec2i(400, 250), Vec2i(200, 50) , Vec2i(250, 150));
 
-    draw_triangle(triangle1, image, white);
-    fillif(std::bind(&Triangle::inside, &triangle1, std::placeholders::_1), image, white);
+    draw_triangle(triangle1, image, white, true);
+    draw_triangle(triangle2, image, green, true);
+    draw_triangle(triangle3, image, red  , false);*/
 
-    draw_triangle(triangle2, image, green);
-    fillif(std::bind(&Triangle::inside, &triangle2, std::placeholders::_1), image, green);
+    Model model("resources/african_head.obj");
 
-    draw_triangle(triangle3, image, red);
-    fillif(std::bind(&Triangle::inside, &triangle3, std::placeholders::_1), image, red);
+    draw_model(model, image, white, true, true);
 
     image.flip_vertically();
     image.write_tga_file(output_path);
