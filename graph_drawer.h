@@ -26,11 +26,11 @@ static void line(const int x0, const int y0, const int x1, const int y1, TGAImag
     }
 }
 
-static void fillif(std::function<bool(Vec2i)> condition, TGAImage& image, const TGAColor color = white)
+static void fillif(std::function<bool(Vec2i)> condition, TGAImage& image, const std::pair<Vec2i, Vec2i> boundingbox, const TGAColor color = white)
 {
-    for (int x = 0; x < image.get_width(); x++)
+    for (int x = boundingbox.first.x; x < boundingbox.second.x; x++)
     {
-        for (int y = 0; y < image.get_height(); y++)
+        for (int y = boundingbox.first.y; y < boundingbox.second.y; y++)
         {
             if (!condition(Vec2i(x, y)))
                 continue;

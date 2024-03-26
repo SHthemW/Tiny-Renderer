@@ -17,7 +17,7 @@ static void draw_triangle(Triangle triangle, TGAImage& image, TGAColor color = w
     line(triangle.get_point3().x, triangle.get_point3().y, triangle.get_point1().x, triangle.get_point1().y, image, color);
 
     if (fill) 
-        fillif(std::bind(&Triangle::inside, &triangle, std::placeholders::_1), image, color);
+        fillif(std::bind(&Triangle::inside, &triangle, std::placeholders::_1), image, triangle.bounding_box(), color);
 
     if (debug)
         printf("\ntriangle (%d, %d), (%d, %d), (%d, %d) is drawed.",
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 
     Model model("resources/african_head.obj");
 
-    draw_model(model, image, white, true, true);
+    draw_model(model, image, white, false, false);
 
     image.flip_vertically();
     image.write_tga_file(output_path);
