@@ -9,6 +9,7 @@ const char* output_path = "out/output.tga";
 
 constexpr int gwidth  = 500;
 constexpr int gheight = 500;
+constexpr int scale_ratio = 250;
 
 static void point(const int x, const int y, TGAImage& image, const TGAColor color)
 {
@@ -32,6 +33,9 @@ int main(int argc, char** argv)
     Model model("resources/african_head.obj");
     TGAImage image(gwidth, gheight, TGAImage::RGB);
 
+    if (scale_ratio > gwidth / 2 || scale_ratio > gheight / 2)
+        printf("warning: too large scale_ratio: %d", scale_ratio);
+
     for (int facei = 0; facei < model.nfaces(); facei++)
     {
         std::vector<int> face = model.face(facei);
@@ -41,10 +45,11 @@ int main(int argc, char** argv)
             Vec3f v0 = model.vert(face[veci]);
             Vec3f v1 = model.vert(face[(veci + 1) % 3]);
 
-            int x0 = (v0.x + 1.) * gwidth  / 2;
-            int y0 = (v0.y + 1.) * gheight / 2;
-            int x1 = (v1.x + 1.) * gwidth  / 2;
-            int y1 = (v1.y + 1.) * gheight / 2;
+            // map coordinates
+            int x0 = (v0.x + 1.) * scale_ratio;
+            int y0 = (v0.y + 1.) * scale_ratio;
+            int x1 = (v1.x + 1.) * scale_ratio;
+            int y1 = (v1.y + 1.) * scale_ratio;
 
             line(x0, y0, x1, y1, image, white);
         }
