@@ -1,38 +1,18 @@
-#include "tgaimage.h"
 #include <stdio.h>
 #include <tuple>
 #include "model.h"
+#include "graph_drawer.h"
 
-const TGAColor white = TGAColor(255, 255, 255, 255);
-const TGAColor red   = TGAColor(255, 0,   0,   255);
 const char* output_path = "out/output.tga";
 
-constexpr int gwidth  = 500;
-constexpr int gheight = 500;
-constexpr int scale_ratio = 250;
+int gwidth  = 500;
+int gheight = 500;
+int scale_ratio = 250;
 
-static void point(const int x, const int y, TGAImage& image, const TGAColor color)
+
+
+static void draw_african_head_line(Model model, TGAImage& image)
 {
-    image.set(x, y, color);
-}
-
-static void line(const int x0, const int y0, const int x1, const int y1, TGAImage& image, const TGAColor color, const int resulotion = 100)
-{
-    const float step = 1. / (float)resulotion;
-
-    for (float t = 0.; t < 1; t += step)
-    {
-        float x = x0 + t * (x1 - x0);
-        float y = y0 + t * (y1 - y0);
-        image.set(x, y, color);
-    }
-}
-
-int main(int argc, char** argv)
-{
-    Model model("resources/african_head.obj");
-    TGAImage image(gwidth, gheight, TGAImage::RGB);
-
     if (scale_ratio > gwidth / 2 || scale_ratio > gheight / 2)
         printf("warning: too large scale_ratio: %d", scale_ratio);
 
@@ -54,6 +34,15 @@ int main(int argc, char** argv)
             line(x0, y0, x1, y1, image, white);
         }
     }
+}
+
+
+int main(int argc, char** argv)
+{
+    Model model("resources/african_head.obj");
+    TGAImage image(gwidth, gheight, TGAImage::RGB);
+
+    draw_african_head_line(model, image);
 
     image.flip_vertically();
     image.write_tga_file(output_path);
