@@ -2,14 +2,13 @@
 #include <cstdlib>
 #include "model.h"
 #include "graph_drawer.h"
+#include "shape.h"
 
 const char* output_path = "out/output.tga";
 
 int gwidth  = 500;
 int gheight = 500;
 int scale_ratio = 250;
-
-
 
 static void draw_african_head_line(Model model, TGAImage& image, TGAColor color = white)
 {
@@ -36,11 +35,11 @@ static void draw_african_head_line(Model model, TGAImage& image, TGAColor color 
     }
 }
 
-static void draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2, TGAImage& image, TGAColor color = white)
+static void draw_triangle(Triangle triangle, TGAImage& image, TGAColor color = white)
 {
-    line(x0, y0, x1, y1, image, color);
-    line(x1, y1, x2, y2, image, color);
-    line(x2, y2, x0, y0, image, color);
+    line(triangle.get_point1().x, triangle.get_point1().y, triangle.get_point2().x, triangle.get_point2().y, image, color);
+    line(triangle.get_point2().x, triangle.get_point2().y, triangle.get_point3().x, triangle.get_point3().y, image, color);
+    line(triangle.get_point3().x, triangle.get_point3().y, triangle.get_point1().x, triangle.get_point1().y, image, color);
 }
 
 
@@ -51,9 +50,18 @@ int main(int argc, char** argv)
 
     // draw_african_head_line(model, image);
 
-    draw_triangle(100, 100, 150, 300, 300, 300, image, white);
-    draw_triangle(200, 450, 450, 450, 100, 350, image, green);
-    draw_triangle(400, 250, 200,  50, 250, 150, image, red);
+    Triangle triangle1(Vec2i(100, 100), Vec2i(150, 300), Vec2i(350, 350));
+    Triangle triangle2(Vec2i(200, 450), Vec2i(450, 450), Vec2i(100, 350));
+    Triangle triangle3(Vec2i(400, 250), Vec2i(200, 50), Vec2i(250, 150));
+
+    draw_triangle(triangle1, image, white);
+    fillif(std::bind(&Triangle::inside, &triangle1, std::placeholders::_1), image, white);
+
+    draw_triangle(triangle2, image, green);
+    fillif(std::bind(&Triangle::inside, &triangle2, std::placeholders::_1), image, green);
+
+    draw_triangle(triangle3, image, red);
+    fillif(std::bind(&Triangle::inside, &triangle3, std::placeholders::_1), image, red);
 
     image.flip_vertically();
     image.write_tga_file(output_path);
