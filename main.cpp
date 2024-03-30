@@ -12,9 +12,9 @@ int scale_ratio = 250;
 
 static void draw_triangle(Triangle triangle, TGAImage& image, TGAColor color = white, bool fill = true, bool debug = false)
 {
-    line(triangle.get_point1().x, triangle.get_point1().y, triangle.get_point2().x, triangle.get_point2().y, image, color);
-    line(triangle.get_point2().x, triangle.get_point2().y, triangle.get_point3().x, triangle.get_point3().y, image, color);
-    line(triangle.get_point3().x, triangle.get_point3().y, triangle.get_point1().x, triangle.get_point1().y, image, color);
+    line(triangle.get_point1(), triangle.get_point2(), image, color);
+    line(triangle.get_point2(), triangle.get_point3(), image, color);
+    line(triangle.get_point3(), triangle.get_point1(), image, color);
 
     if (fill) 
         fillif(std::bind(&Triangle::inside, &triangle, std::placeholders::_1), image, triangle.bounding_box(), color);
@@ -49,7 +49,7 @@ static void draw_model(Model model, TGAImage& image, TGAColor linecolor = white,
             int x1 = (v1.x + 1.) * scale_ratio;
             int y1 = (v1.y + 1.) * scale_ratio;
 
-            line(x0, y0, x1, y1, image, linecolor);
+            line(Vec2i(x0, y0), Vec2i(x1, y1), image, linecolor);
             triangle_vertex[veci] = Vec2i(x0, y0);
         }
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 
     Model model("resources/african_head.obj");
 
-    draw_model(model, image, white, false, false);
+    draw_model(model, image, white, true, false);
 
     image.flip_vertically();
     image.write_tga_file(output_path);
