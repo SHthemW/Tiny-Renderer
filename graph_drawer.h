@@ -2,13 +2,11 @@
 #include "tgaimage.h"
 #include <functional>
 
+const TGAColor black = TGAColor(  0,   0,   0, 255);
+const TGAColor clear = TGAColor(  0,   0,   0,   0);
 const TGAColor white = TGAColor(255, 255, 255, 255);
-const TGAColor green = TGAColor(0  , 255,   0, 255);
+const TGAColor green = TGAColor(  0, 255,   0, 255);
 const TGAColor red   = TGAColor(255,   0,   0, 255);
-const TGAColor random_color()
-{
-    return TGAColor(rand() % 255, rand() % 255, rand() % 255, 255);
-}
 
 static void line(const Vec2i p0, const Vec2i p1, TGAImage& image, const TGAColor color = white, const int resulotion = 10)
 {
@@ -37,4 +35,30 @@ static void fillif(const std::function<bool(Vec2i)> condition, TGAImage& image, 
             image.set(x, y, color);
         }
     }
+}
+
+const static TGAColor random_color()
+{
+    return TGAColor(rand() % 255, rand() % 255, rand() % 255, 255);
+}
+
+const static TGAColor render_color(const Vec3f normal, const Vec3f light_direction)
+{
+    // density is 'dot product' of normal and light direction.
+    float intensity = 
+        (normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z)
+        / 
+        (normal.norm() * light_direction.norm());
+
+    if (intensity >= -1 && intensity <= 0)
+    {
+        return clear;
+    }
+    if (intensity > 0 && intensity <= 1)
+    {
+        int rgb_val = (int)(255 * intensity);
+        return TGAColor(rgb_val, rgb_val, rgb_val, 1);
+    }
+    else 
+        throw new std::exception("err: invalid intensity value: %f", intensity);
 }

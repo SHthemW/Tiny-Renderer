@@ -18,4 +18,12 @@ public:
 	const Vec2i get_point1() const;
 	const Vec2i get_point2() const;
 	const Vec2i get_point3() const;
+
+	const static Vec3f calc_normal(Vec3f a, Vec3f b)
+	{
+		return Vec3f(
+			a.y * b.z - a.z * b.y, 
+			a.z * b.x - a.x * b.z, 
+			a.x * b.y - a.y * b.x);
+	}
 };

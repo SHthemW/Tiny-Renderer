@@ -57,6 +57,19 @@ struct TGAColor {
 		}
 		return *this;
 	}
+
+	const bool operator == (const TGAColor& other) const
+	{
+		return other.r == r
+			&& other.g == g
+			&& other.b == b
+			&& other.a == a;
+	}
+
+	const bool operator != (const TGAColor& other) const
+	{
+		return !(*this == other);
+	}
 };
 
 
