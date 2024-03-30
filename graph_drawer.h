@@ -26,7 +26,7 @@ static void line(const Vec2i p0, const Vec2i p1, TGAImage& image, const TGAColor
     }
 }
 
-static void fillif(std::function<bool(Vec2i)> condition, TGAImage& image, const std::pair<Vec2i, Vec2i> boundingbox, const TGAColor color = white)
+static void fillif(const std::function<bool(Vec2i)> condition, TGAImage& image, const std::pair<Vec2i, Vec2i> boundingbox, const TGAColor color = white)
 {
     for (int x = boundingbox.first.x; x < boundingbox.second.x; x++)
     {

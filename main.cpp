@@ -64,14 +64,6 @@ int main(int argc, char** argv)
 {
     TGAImage image(gwidth, gheight, TGAImage::RGB);
 
-    /*Triangle triangle1(Vec2i(100, 100), Vec2i(150, 300), Vec2i(350, 350));
-    Triangle triangle2(Vec2i(200, 450), Vec2i(450, 450), Vec2i(100, 350));
-    Triangle triangle3(Vec2i(400, 250), Vec2i(200, 50) , Vec2i(250, 150));
-
-    draw_triangle(triangle1, image, white, true);
-    draw_triangle(triangle2, image, green, true);
-    draw_triangle(triangle3, image, red  , false);*/
-
     Model model("resources/african_head.obj");
 
     draw_model(model, image, white, true, false);
