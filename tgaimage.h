@@ -70,6 +70,16 @@ struct TGAColor {
 	{
 		return !(*this == other);
 	}
+
+	const TGAColor& operator * (const TGAColor& other) const
+	{
+		return TGAColor(r * other.r, g * other.g, b * other.b, a * other.a);
+	}
+
+	const TGAColor& operator * (const float multiple) const
+	{
+		return TGAColor(r * multiple, g * multiple, b * multiple, a * multiple);
+	}
 };
 
 

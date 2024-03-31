@@ -75,11 +75,38 @@ static void draw_model(Model model, TGAImage& image, TGAColor linecolor, bool fi
 
 int main(int argc, char** argv)
 {
-    TGAImage image(gwidth, gheight, TGAImage::RGB);
+    constexpr int yb_width = 800;
 
-    Model model("resources/african_head.obj");
+    TGAImage image(yb_width, gheight, TGAImage::RGB);
 
-    draw_model(model, image, white, true, true, false);
+    /*Model model("resources/african_head.obj");
+    draw_model(model, image, white, true, true, false);*/
+
+    line(Vec2i( 20,  34), Vec2i(744, 400), image, red);
+    line(Vec2i(120, 434), Vec2i(444, 400), image, green);
+    line(Vec2i(330, 463), Vec2i(594, 200), image, blue);
+    
+    int ybuffer[yb_width];
+
+    // init ybuffer
+    for (int x = 0; x < yb_width; x++)
+        ybuffer[x] = std::numeric_limits<int>::min();
+
+    rasterize2d(Vec2i( 20,  34), Vec2i(744, 400), ybuffer, std::size(ybuffer));
+    rasterize2d(Vec2i(120, 434), Vec2i(444, 400), ybuffer, std::size(ybuffer));
+    rasterize2d(Vec2i(330, 463), Vec2i(594, 200), ybuffer, std::size(ybuffer));
+
+    // draw ybuffer graph
+    for (int x = 0; x < yb_width; x++)
+    {
+        TGAColor render_color = cyan;
+
+        if (ybuffer[x] > std::numeric_limits<int>::min())
+            render_color = white * (ybuffer[x] / (float)gheight);
+
+        for (int y = 1; y < 16; y++)
+            image.set(x, y, render_color);
+    }
 
     image.flip_vertically();
     image.write_tga_file(output_path);

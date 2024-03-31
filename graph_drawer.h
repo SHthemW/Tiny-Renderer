@@ -6,6 +6,8 @@ const TGAColor black = TGAColor(  0,   0,   0, 255);
 const TGAColor clear = TGAColor(  0,   0,   0,   0);
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor green = TGAColor(  0, 255,   0, 255);
+const TGAColor blue  = TGAColor(  0,   0, 255, 255);
+const TGAColor cyan  = TGAColor(255,   0, 255, 255);
 const TGAColor red   = TGAColor(255,   0,   0, 255);
 
 static void line(const Vec2i p0, const Vec2i p1, TGAImage& image, const TGAColor color = white, const int resulotion = 10)
@@ -34,6 +36,24 @@ static void fillif(const std::function<bool(Vec2i)> condition, TGAImage& image, 
                 continue;
             image.set(x, y, color);
         }
+    }
+}
+
+static void rasterize2d(Vec2i p0, Vec2i p1, int ybuffer[], const std::size_t ybuffer_size)
+{
+    if (p0.x > p1.x)
+        std::swap(p0, p1);
+
+    if (p0.x < 0 || p1.x > ybuffer_size)
+        throw new std::exception("error: point coordinate out of range.");
+
+    for (int x = p0.x; x < p1.x; x++)
+    {
+        float t = (x - p0.x) / (float)(p1.x - p0.x);
+        int   y = p0.y * (1. - t) + p1.y * t;
+
+        if (ybuffer[x] < y)
+            ybuffer[x] = y;
     }
 }
 
