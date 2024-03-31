@@ -60,6 +60,11 @@ static void rasterize2d(Vec2i p0, Vec2i p1, int ybuffer[], const std::size_t ybu
     }
 }
 
+static void rasterize3d()
+{
+
+}
+
 const static TGAColor random_color()
 {
     return TGAColor(rand() % 255, rand() % 255, rand() % 255, 255);

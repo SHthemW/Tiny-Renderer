@@ -61,7 +61,11 @@ static void draw_model(Model model, TGAImage& image, TGAColor linecolor, bool fi
             screen_vertexs[veci] = screen_curr;
         }
 
-        TGAColor face_color = render_color(Triangle::calc_normal(world_vertexs[2] - world_vertexs[1], world_vertexs[1] - world_vertexs[0]), global_light_direction);
+        TGAColor face_color = render_color(
+            Triangle::calc_normal(
+                world_vertexs[2] - world_vertexs[1], 
+                world_vertexs[1] - world_vertexs[0]), 
+            global_light_direction);
 
         if (face_color != clear)
             draw_triangle(Triangle(screen_vertexs), image, face_color, fill, edge, debug);
@@ -79,41 +83,17 @@ static void output(TGAImage& image, const std::string filename)
 
 int main(int argc, char** argv)
 {
-    /*Model model("resources/african_head.obj");
-    draw_model(model, image, white, true, true, false);*/
+    TGAImage model_scene(gwidth, gheight, TGAImage::RGB);
+    TGAImage depth_scene(gwidth, gheight, TGAImage::RGB);
 
-    constexpr int yb_width = 800;
+    Model model("resources/african_head.obj");
 
-    TGAImage line_scene (yb_width, gheight, TGAImage::RGB);
-    TGAImage depth_scene(yb_width, 16,      TGAImage::RGB);
+    int * zbuffer = new int[gwidth * gheight];
 
-    line(Vec2i( 20,  34), Vec2i(744, 400), line_scene, red);
-    line(Vec2i(120, 434), Vec2i(444, 400), line_scene, green);
-    line(Vec2i(330, 463), Vec2i(594, 200), line_scene, blue);
-    
-    int ybuffer[yb_width];
 
-    // init ybuffer
-    for (int x = 0; x < yb_width; x++)
-        ybuffer[x] = std::numeric_limits<int>::min();
+    draw_model(model, model_scene, white, true, true, false);
 
-    rasterize2d(Vec2i( 20,  34), Vec2i(744, 400), ybuffer, std::size(ybuffer), line_scene, red);
-    rasterize2d(Vec2i(120, 434), Vec2i(444, 400), ybuffer, std::size(ybuffer), line_scene, green);
-    rasterize2d(Vec2i(330, 463), Vec2i(594, 200), ybuffer, std::size(ybuffer), line_scene, blue);
-
-    // draw ybuffer graph
-    for (int x = 0; x < yb_width; x++)
-    {
-        TGAColor render_color = cyan;
-
-        if (ybuffer[x] > std::numeric_limits<int>::min())
-            render_color = white * (ybuffer[x] / (float)gheight);
-
-        for (int y = 1; y < 16; y++)
-            depth_scene.set(x, y, render_color);
-    }
-
-    output(line_scene, "line.tga");
+    output(model_scene, "output.tga");
     output(depth_scene, "depth.tga");
 
     return 0;
