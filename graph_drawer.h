@@ -39,7 +39,7 @@ static void fillif(const std::function<bool(Vec2i)> condition, TGAImage& image, 
     }
 }
 
-static void rasterize2d(Vec2i p0, Vec2i p1, int ybuffer[], const std::size_t ybuffer_size)
+static void rasterize2d(Vec2i p0, Vec2i p1, int ybuffer[], const std::size_t ybuffer_size, TGAImage& image, const TGAColor color)
 {
     if (p0.x > p1.x)
         std::swap(p0, p1);
@@ -53,7 +53,10 @@ static void rasterize2d(Vec2i p0, Vec2i p1, int ybuffer[], const std::size_t ybu
         int   y = p0.y * (1. - t) + p1.y * t;
 
         if (ybuffer[x] < y)
+        {
             ybuffer[x] = y;
+            image.set(x, 1, color);
+        }
     }
 }
 

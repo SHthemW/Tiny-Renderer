@@ -4,8 +4,6 @@
 #include "graph_drawer.h"
 #include "shape.h"
 
-const char* output_path = "out/output.tga";
-
 int gwidth  = 500;
 int gheight = 500;
 int scale_ratio = 250;
@@ -73,18 +71,25 @@ static void draw_model(Model model, TGAImage& image, TGAColor linecolor, bool fi
     }
 }
 
+static void output(TGAImage& image, const std::string filename)
+{
+    image.flip_vertically();
+    image.write_tga_file(("out/" + filename).c_str());
+}
+
 int main(int argc, char** argv)
 {
-    constexpr int yb_width = 800;
-
-    TGAImage image(yb_width, gheight, TGAImage::RGB);
-
     /*Model model("resources/african_head.obj");
     draw_model(model, image, white, true, true, false);*/
 
-    line(Vec2i( 20,  34), Vec2i(744, 400), image, red);
-    line(Vec2i(120, 434), Vec2i(444, 400), image, green);
-    line(Vec2i(330, 463), Vec2i(594, 200), image, blue);
+    constexpr int yb_width = 800;
+
+    TGAImage line_scene (yb_width, gheight, TGAImage::RGB);
+    TGAImage depth_scene(yb_width, 16,      TGAImage::RGB);
+
+    line(Vec2i( 20,  34), Vec2i(744, 400), line_scene, red);
+    line(Vec2i(120, 434), Vec2i(444, 400), line_scene, green);
+    line(Vec2i(330, 463), Vec2i(594, 200), line_scene, blue);
     
     int ybuffer[yb_width];
 
@@ -92,9 +97,9 @@ int main(int argc, char** argv)
     for (int x = 0; x < yb_width; x++)
         ybuffer[x] = std::numeric_limits<int>::min();
 
-    rasterize2d(Vec2i( 20,  34), Vec2i(744, 400), ybuffer, std::size(ybuffer));
-    rasterize2d(Vec2i(120, 434), Vec2i(444, 400), ybuffer, std::size(ybuffer));
-    rasterize2d(Vec2i(330, 463), Vec2i(594, 200), ybuffer, std::size(ybuffer));
+    rasterize2d(Vec2i( 20,  34), Vec2i(744, 400), ybuffer, std::size(ybuffer), line_scene, red);
+    rasterize2d(Vec2i(120, 434), Vec2i(444, 400), ybuffer, std::size(ybuffer), line_scene, green);
+    rasterize2d(Vec2i(330, 463), Vec2i(594, 200), ybuffer, std::size(ybuffer), line_scene, blue);
 
     // draw ybuffer graph
     for (int x = 0; x < yb_width; x++)
@@ -105,11 +110,11 @@ int main(int argc, char** argv)
             render_color = white * (ybuffer[x] / (float)gheight);
 
         for (int y = 1; y < 16; y++)
-            image.set(x, y, render_color);
+            depth_scene.set(x, y, render_color);
     }
 
-    image.flip_vertically();
-    image.write_tga_file(output_path);
+    output(line_scene, "line.tga");
+    output(depth_scene, "depth.tga");
 
     return 0;
 }
