@@ -39,7 +39,7 @@ static void fillif(const std::function<bool(Vec2i)> condition, TGAImage& image, 
     }
 }
 
-static void rasterize2d(Vec2i p0, Vec2i p1, int ybuffer[], const std::size_t ybuffer_size, TGAImage& image, const TGAColor color)
+static void rasterize2d(Vec2i p0, Vec2i p1, int* ybuffer, const std::size_t ybuffer_size, TGAImage& image, const TGAColor color)
 {
     if (p0.x > p1.x)
         std::swap(p0, p1);
@@ -60,9 +60,17 @@ static void rasterize2d(Vec2i p0, Vec2i p1, int ybuffer[], const std::size_t ybu
     }
 }
 
-static void rasterize3d()
+static void rasterize3d(const std::function<bool(Vec2i)> condition, const std::pair<Vec2i, Vec2i> boundingbox, int** zbuffer, TGAImage& image, const TGAColor color)
 {
-
+    for (int x = boundingbox.first.x; x < boundingbox.second.x; x++)
+    {
+        for (int y = boundingbox.first.y; y < boundingbox.second.y; y++)
+        {
+            if (!condition(Vec2i(x, y)))
+                continue;
+            
+        }
+    }
 }
 
 const static TGAColor random_color()
@@ -82,7 +90,7 @@ const static TGAColor render_color(const Vec3f normal, const Vec3f light_directi
     {
         return clear;
     }
-    if (intensity > 0 && intensity <= 1)
+    if (intensity >   0 && intensity <= 1)
     {
         int rgb_val = (int)(255 * intensity);
         return TGAColor(rgb_val, rgb_val, rgb_val, 1);

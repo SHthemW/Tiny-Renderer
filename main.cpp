@@ -4,13 +4,13 @@
 #include "graph_drawer.h"
 #include "shape.h"
 
-int gwidth  = 500;
-int gheight = 500;
-int scale_ratio = 250;
+constexpr int gwidth  = 500;
+constexpr int gheight = 500;
+constexpr int scale_ratio = 250;
 
 Vec3f global_light_direction(0, 0, -1);
 
-static void draw_triangle(Triangle triangle, TGAImage& image, TGAColor color, bool fill, bool edge, bool debug)
+static void draw_triangle(Triangle2D triangle, TGAImage& image, TGAColor color, bool fill, bool edge, bool debug)
 {
     if (!edge && !fill)
         printf("warning: triangle has neither edge nor solid fill. you may cannot see anything on output.");
@@ -23,7 +23,7 @@ static void draw_triangle(Triangle triangle, TGAImage& image, TGAColor color, bo
     }
 
     if (fill)
-        fillif(std::bind(&Triangle::inside, &triangle, std::placeholders::_1), image, triangle.bounding_box(), color);
+        fillif([=](Vec2i vec) { return triangle.inside(vec); }, image, triangle.bounding_box(), color);
 
     if (debug)
         printf("\ntriangle (%d, %d), (%d, %d), (%d, %d) is drawed.",
@@ -62,13 +62,11 @@ static void draw_model(Model model, TGAImage& image, TGAColor linecolor, bool fi
         }
 
         TGAColor face_color = render_color(
-            Triangle::calc_normal(
-                world_vertexs[2] - world_vertexs[1], 
-                world_vertexs[1] - world_vertexs[0]), 
+            Triangle3D(world_vertexs).normal(),
             global_light_direction);
 
         if (face_color != clear)
-            draw_triangle(Triangle(screen_vertexs), image, face_color, fill, edge, debug);
+            draw_triangle(Triangle2D(screen_vertexs), image, face_color, fill, edge, debug);
 
         if (debug)
             printf("\ndrawing model triangle: [%d / %d]", facei, face_num);
@@ -88,13 +86,19 @@ int main(int argc, char** argv)
 
     Model model("resources/african_head.obj");
 
-    int * zbuffer = new int[gwidth * gheight];
+    // heap alloc zbuffer
+    int** zbuffer = new int* [gwidth]; 
+    for (int i = 0; i < gwidth; i++) 
+        zbuffer[i] = new int[gheight];
+
 
 
     draw_model(model, model_scene, white, true, true, false);
 
     output(model_scene, "output.tga");
     output(depth_scene, "depth.tga");
+
+    delete[] zbuffer;
 
     return 0;
 }
