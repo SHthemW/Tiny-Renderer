@@ -60,19 +60,6 @@ static void rasterize2d(Vec2i p0, Vec2i p1, int* ybuffer, const std::size_t ybuf
     }
 }
 
-static void rasterize3d(const std::function<bool(Vec2i)> condition, const std::pair<Vec2i, Vec2i> boundingbox, int** zbuffer, TGAImage& image, const TGAColor color)
-{
-    for (int x = boundingbox.first.x; x < boundingbox.second.x; x++)
-    {
-        for (int y = boundingbox.first.y; y < boundingbox.second.y; y++)
-        {
-            if (!condition(Vec2i(x, y)))
-                continue;
-            
-        }
-    }
-}
-
 const static TGAColor random_color()
 {
     return TGAColor(rand() % 255, rand() % 255, rand() % 255, 255);

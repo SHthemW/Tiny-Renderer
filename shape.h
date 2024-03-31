@@ -37,11 +37,6 @@ public:
 			(_point1.y + _point2.y + _point3.y) / 3.0f, 
 			(_point1.z + _point2.z + _point3.z) / 3.0f);
 	}
-
-	const static Vec3f calc_normal(Vec3f a, Vec3f b)
-	{
-		return a ^ b;
-	}
 };
 
 struct Triangle2D : public Triangle<Vec2i>
@@ -87,5 +82,25 @@ public:
 		Vec3f edge1 = _point3 - _point1;
         Vec3f edge2 = _point2 - _point1; // dont change the order!
         return edge1 ^ edge2;
+	}
+
+	const Vec3f barycentric(const Vec3f point) const
+	{
+		Vec3f 
+			v0 = _point2 - _point1, 
+			v1 = _point3 - _point1, 
+			v2 =  point  - _point1;
+
+		float d00 = v0 * v0;
+		float d01 = v0 * v1;
+		float d11 = v1 * v1;
+		float d20 = v2 * v0;
+		float d21 = v2 * v1;
+		float denom =  d00 * d11 - d01 * d01;
+		float alpha = (d11 * d20 - d01 * d21) / denom;
+		float beta  = (d00 * d21 - d01 * d20) / denom;
+		float gamma = 1.0f - alpha - beta;
+
+		return Vec3f(alpha, beta, gamma);
 	}
 };
