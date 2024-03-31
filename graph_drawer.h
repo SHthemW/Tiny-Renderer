@@ -26,20 +26,7 @@ static void line(const Vec2i p0, const Vec2i p1, TGAImage& image, const TGAColor
     }
 }
 
-static void fillif(const std::function<bool(Vec2i)> condition, TGAImage& image, const std::pair<Vec2i, Vec2i> boundingbox, const TGAColor color = white)
-{
-    for (int x = boundingbox.first.x; x < boundingbox.second.x; x++)
-    {
-        for (int y = boundingbox.first.y; y < boundingbox.second.y; y++)
-        {
-            if (!condition(Vec2i(x, y)))
-                continue;
-            image.set(x, y, color);
-        }
-    }
-}
-
-static void rasterize2d(Vec2i p0, Vec2i p1, int* ybuffer, const std::size_t ybuffer_size, TGAImage& image, const TGAColor color)
+static void draw_ybuffer2d(Vec2i p0, Vec2i p1, int* ybuffer, const std::size_t ybuffer_size, TGAImage& image, const TGAColor color)
 {
     if (p0.x > p1.x)
         std::swap(p0, p1);
@@ -56,6 +43,37 @@ static void rasterize2d(Vec2i p0, Vec2i p1, int* ybuffer, const std::size_t ybuf
         {
             ybuffer[x] = y;
             image.set(x, 1, color);
+        }
+    }
+}
+
+static void draw_zbuffer3d(int** zbuffer, const int sizex, const int sizey, TGAImage& image, const TGAColor color)
+{
+    int max_val = std::numeric_limits<int>::min();
+    int min_val = std::numeric_limits<int>::max();
+
+    for (int i = 0; i < sizex; i++)
+    {
+        for (int j = 0; j < sizey; j++)
+        {
+            if (zbuffer[i][j] == std::numeric_limits<int>::min())
+                continue;
+            max_val = std::max(max_val, zbuffer[i][j]);
+            min_val = std::min(min_val, zbuffer[i][j]);
+        }
+    }
+
+    for (int x = 0; x < sizex; x++)
+    {
+        for (int y = 0; y < sizey; y++)
+        {
+            if (zbuffer[x][y] == std::numeric_limits<int>::min())
+            {
+                image.set(x, y, cyan);
+                continue;
+            }
+            TGAColor c = white * ((float)(zbuffer[x][y] - min_val) / (float)(max_val - min_val));
+            image.set(x, y, c);
         }
     }
 }

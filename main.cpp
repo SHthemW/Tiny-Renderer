@@ -10,40 +10,40 @@ constexpr int scale_ratio = 250;
 
 Vec3f global_light_direction(0, 0, -1);
 
-static void draw_triangle(Triangle2D todraw, Triangle3D referance, int** zbuffer, TGAImage& image, TGAColor color, bool fill, bool edge, bool debug)
+static void draw_triangle(Triangle2D todraw, Triangle3D referance, int** zbuffer, TGAImage& image, TGAColor color, bool debug)
 {
-    if (!edge && !fill)
-        printf("warning: triangle has neither edge nor solid fill. you may cannot see anything on output.");
+    bool require_edge = false;
 
-    if (edge)
+    for (int x = todraw.bounding_box().first.x; x < todraw.bounding_box().second.x; x++)
+    {
+        for (int y = todraw.bounding_box().first.y; y < todraw.bounding_box().second.y; y++)
+        {
+            if (!todraw.inside(Vec2i(x, y)))
+                continue;
+
+            // apply zbuffer
+            Vec3f p(x, y, 0);
+            Vec3f bc_screen = referance.barycentric(p);
+
+            p.z = referance.get_point1().z * bc_screen.x
+                + referance.get_point2().z * bc_screen.y
+                + referance.get_point3().z * bc_screen.z;
+
+            if (zbuffer[(int)p.x][(int)p.y] < p.z)
+            {
+                zbuffer[(int)p.x][(int)p.y] = p.z;
+                image.set(x, y, color);
+                require_edge = true;
+            }
+        }
+    }
+
+    if (require_edge)
     {
         line(todraw.get_point1(), todraw.get_point2(), image, color);
         line(todraw.get_point2(), todraw.get_point3(), image, color);
         line(todraw.get_point3(), todraw.get_point1(), image, color);
     }
-
-    if (fill)
-        fillif(
-            [=, &image](Vec2i coord) -> bool
-            { 
-                if (!todraw.inside(coord))
-                    return false;
-
-                // apply zbuffer
-                Vec3f p(coord.x, coord.y, 0);
-                Vec3f bc_screen = referance.barycentric(p);
-
-                p.z = referance.get_point1().z * bc_screen.x
-                    + referance.get_point2().z * bc_screen.y
-                    + referance.get_point3().z * bc_screen.z;
-
-                if (zbuffer[(int)p.x][(int)p.y] >= p.z)
-                    return false;
-
-                zbuffer[(int)p.x][(int)p.y] = p.z;
-                return true; 
-            }, 
-            image, todraw.bounding_box(), color);
 
     if (debug)
         printf("\ntriangle (%d, %d), (%d, %d), (%d, %d) is drawed.",
@@ -52,7 +52,7 @@ static void draw_triangle(Triangle2D todraw, Triangle3D referance, int** zbuffer
             todraw.get_point3().x, todraw.get_point3().y);
 }
 
-static void draw_model(Model model, TGAImage& image, TGAColor linecolor, int** zbuffer, bool fill, bool edge, bool debug)
+static void draw_model(Model model, TGAImage& image, TGAColor linecolor, int** zbuffer, bool debug)
 {
     if (scale_ratio > gwidth / 2 || scale_ratio > gheight / 2)
         printf("warning: too large scale_ratio: %d", scale_ratio);
@@ -90,7 +90,7 @@ static void draw_model(Model model, TGAImage& image, TGAColor linecolor, int** z
             global_light_direction);
 
         if (face_color != clear)
-            draw_triangle(face_triangle_screen, face_triangle_3d, zbuffer, image, face_color, fill, edge, debug);
+            draw_triangle(face_triangle_screen, face_triangle_3d, zbuffer, image, face_color, debug);
 
         if (debug)
             printf("\ndrawing model triangle: [%d / %d]", facei, face_num);
@@ -121,7 +121,8 @@ int main(int argc, char** argv)
             zbuffer[x][y] = std::numeric_limits<int>::min();
 
     // draw
-    draw_model(model, model_scene, white, zbuffer, true, true, false);
+    draw_model(model, model_scene, white, zbuffer, false);
+    draw_zbuffer3d(zbuffer, gwidth, gheight, depth_scene, white);
 
     output(model_scene, "output.tga");
     output(depth_scene, "depth.tga");
